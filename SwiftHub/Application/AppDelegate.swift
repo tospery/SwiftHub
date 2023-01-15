@@ -9,12 +9,12 @@
 import UIKit
 import Toast_Swift
 
-@main
+@UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-//    static var shared: AppDelegate? {
-//        return UIApplication.shared.delegate as? AppDelegate
-//    }
+    static var shared: AppDelegate? {
+        return UIApplication.shared.delegate as? AppDelegate
+    }
 
     var window: UIWindow?
 
@@ -22,7 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
 
         let libsManager = LibsManager.shared
-        libsManager.setupLibs()
+        libsManager.setupLibs(with: window)
 
         if Configs.Network.useStaging == true {
             // Logout

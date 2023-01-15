@@ -31,7 +31,6 @@ class SettingsViewModel: ViewModel, ViewModelType {
     let whatsNewManager: WhatsNewManager
 
     let swiftHubRepository = BehaviorRelay<Repository?>(value: nil)
-    let flutterHubRepository = BehaviorRelay<Repository?>(value: nil)
 
     var cellDisposeBag = DisposeBag()
 
@@ -53,7 +52,8 @@ class SettingsViewModel: ViewModel, ViewModelType {
             return LibsManager.shared.removeKingfisherCache()
         }
 
-        let refresh = Observable.of(input.trigger, cacheRemoved, swiftHubRepository.mapToVoid(), flutterHubRepository.mapToVoid(), bannerEnabled.mapToVoid(), nightModeEnabled.mapToVoid()).merge()
+        let refresh = Observable.of(input.trigger, cacheRemoved, swiftHubRepository.mapToVoid(),
+                                    bannerEnabled.mapToVoid(), nightModeEnabled.mapToVoid()).merge()
 
         let cacheSize = refresh.flatMapLatest { () -> Observable<Int> in
             return LibsManager.shared.kingfisherCacheSize()
@@ -78,13 +78,10 @@ class SettingsViewModel: ViewModel, ViewModelType {
                 items.append(SettingsSection.setting(title: R.string.localizable.settingsAccountSectionTitle.key.localized(), items: accountItems))
             }
 
-            if let swiftHubRepository = self.swiftHubRepository.value,
-                let flutterHubRepository = self.flutterHubRepository.value {
+            if let swiftHubRepository = self.swiftHubRepository.value {
                 let swiftHubCellViewModel = RepositoryCellViewModel(with: swiftHubRepository)
-                let flutterHubCellViewModel = RepositoryCellViewModel(with: flutterHubRepository)
                 items.append(SettingsSection.setting(title: R.string.localizable.settingsProjectsSectionTitle.key.localized(), items: [
-                    SettingsSectionItem.repositoryItem(viewModel: swiftHubCellViewModel),
-                    SettingsSectionItem.repositoryItem(viewModel: flutterHubCellViewModel)
+                    SettingsSectionItem.repositoryItem(viewModel: swiftHubCellViewModel)
                 ]))
             }
 
@@ -144,17 +141,6 @@ class SettingsViewModel: ViewModel, ViewModelType {
                 .trackError(self.error)
             }.subscribe(onNext: { [weak self] (repository) in
                 self?.swiftHubRepository.accept(repository)
-            }).disposed(by: rx.disposeBag)
-
-        input.trigger.flatMapLatest { [weak self] () -> Observable<Repository> in
-            guard let self = self else { return Observable.just(Repository()) }
-            let fullname = "khoren93/FlutterHub"
-            let qualifiedName = "main"
-            return self.provider.repository(fullname: fullname, qualifiedName: qualifiedName)
-                .trackActivity(self.loading)
-                .trackError(self.error)
-            }.subscribe(onNext: { [weak self] (repository) in
-                self?.flutterHubRepository.accept(repository)
             }).disposed(by: rx.disposeBag)
 
         let selectedEvent = input.selection

@@ -10,7 +10,7 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-class DefaultTableViewCellViewModel: TableViewCellViewModel {
+class DefaultTableViewCellViewModel: NSObject {
     let title = BehaviorRelay<String?>(value: nil)
     let detail = BehaviorRelay<String?>(value: nil)
     let secondDetail = BehaviorRelay<String?>(value: nil)

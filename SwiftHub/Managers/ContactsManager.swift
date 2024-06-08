@@ -30,7 +30,7 @@ class ContactsManager: NSObject {
             switch CNContactStore.authorizationStatus(for: CNEntityType.contacts) {
             case CNAuthorizationStatus.denied, CNAuthorizationStatus.restricted:
                 // User has denied the current app to access the contacts.
-                single(.failure(ContactsError.accessDenied))
+                single(.error(ContactsError.accessDenied))
 
             case CNAuthorizationStatus.notDetermined:
                 // This case means the user is prompted for the first time for allowing contacts
@@ -41,7 +41,7 @@ class ContactsManager: NSObject {
                             single(.success(newContacts))
                         }).disposed(by: self.rx.disposeBag)
                     } else if let error = error {
-                        single(.failure(error))
+                        single(.error(error))
                     }
                 })
 
@@ -64,7 +64,7 @@ class ContactsManager: NSObject {
                 }
                     // Catching exception as enumerateContactsWithFetchRequest can throw errors
                 catch {
-                    single(.failure(error))
+                    single(.error(error))
                     logError(error.localizedDescription)
                 }
             @unknown default: break

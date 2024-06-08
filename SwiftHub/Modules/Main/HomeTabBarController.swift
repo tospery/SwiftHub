@@ -63,8 +63,9 @@ enum HomeTabBarItem: Int {
         case .settings: animation = RAMRightRotationAnimation()
         case .login: animation = RAMBounceAnimation()
         }
-        animation.theme.iconSelectedColor = themeService.attribute { $0.secondary }
-        animation.theme.textSelectedColor = themeService.attribute { $0.secondary }
+        _ = themeService.rx
+            .bind({ $0.secondary }, to: animation.rx.iconSelectedColor)
+            .bind({ $0.secondary }, to: animation.rx.textSelectedColor)
         return animation
     }
 
@@ -72,8 +73,11 @@ enum HomeTabBarItem: Int {
         let vc = controller(with: viewModel, navigator: navigator)
         let item = RAMAnimatedTabBarItem(title: title, image: image, tag: rawValue)
         item.animation = animation
-        item.theme.iconColor = themeService.attribute { $0.text }
-        item.theme.textColor = themeService.attribute { $0.text }
+        _ = themeService.rx
+            .bind({ $0.text }, to: item.rx.iconColor)
+            .bind({ $0.text }, to: item.rx.textColor)
+
+        item.yOffSet = -1
         vc.tabBarItem = item
         return vc
     }
@@ -94,6 +98,8 @@ class HomeTabBarController: RAMAnimatedTabBarController, Navigatable {
         fatalError("init(coder:) has not been implemented")
     }
 
+    let tabTapped = PublishSubject<UIGestureRecognizer>()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -103,6 +109,17 @@ class HomeTabBarController: RAMAnimatedTabBarController, Navigatable {
     }
 
     func makeUI() {
+        // Configure tab bar
+        hero.isEnabled = true
+        tabBar.hero.id = "TabBarID"
+        tabBar.isTranslucent = false
+
+        // Fixed an issue when TabBar is switched quickly, the selected item is abnormal
+        tabTapped.throttle(DispatchTimeInterval.milliseconds(1000), scheduler: MainScheduler.asyncInstance)
+            .subscribe(onNext: { [weak self] (gesture) in
+                self?.tabTapped(gesture)
+            }).disposed(by: rx.disposeBag)
+
         NotificationCenter.default
             .rx.notification(NSNotification.Name(LCLLanguageChangeNotification))
             .subscribe { [weak self] (event) in
@@ -113,15 +130,16 @@ class HomeTabBarController: RAMAnimatedTabBarController, Navigatable {
                 self?.setSelectIndex(from: 0, to: self?.selectedIndex ?? 0)
             }.disposed(by: rx.disposeBag)
 
-        tabBar.theme.barTintColor = themeService.attribute { $0.primaryDark }
+        themeService.rx
+            .bind({ $0.primaryDark }, to: tabBar.rx.barTintColor)
+            .disposed(by: rx.disposeBag)
 
-        themeService.typeStream.delay(DispatchTimeInterval.milliseconds(200), scheduler: MainScheduler.instance)
-            .subscribe(onNext: { (theme) in
-                switch theme {
-                case .light(let color), .dark(let color):
-                    self.changeSelectedColor(color.color, iconSelectedColor: color.color)
-                }
-            }).disposed(by: rx.disposeBag)
+        themeService.typeStream.delay(DispatchTimeInterval.milliseconds(700), scheduler: MainScheduler.instance).subscribe(onNext: { (theme) in
+            switch theme {
+            case .light(let color), .dark(let color):
+                self.changeSelectedColor(color.color, iconSelectedColor: color.color)
+            }
+        }).disposed(by: rx.disposeBag)
     }
 
     func bindViewModel() {
@@ -130,7 +148,7 @@ class HomeTabBarController: RAMAnimatedTabBarController, Navigatable {
         let input = HomeTabBarViewModel.Input(whatsNewTrigger: rx.viewDidAppear.mapToVoid())
         let output = viewModel.transform(input: input)
 
-        output.tabBarItems.delay(.milliseconds(50)).drive(onNext: { [weak self] (tabBarItems) in
+        output.tabBarItems.drive(onNext: { [weak self] (tabBarItems) in
             if let strongSelf = self {
                 let controllers = tabBarItems.map { $0.getController(with: viewModel.viewModel(for: $0), navigator: strongSelf.navigator) }
                 strongSelf.setViewControllers(controllers, animated: false)
@@ -142,5 +160,13 @@ class HomeTabBarController: RAMAnimatedTabBarController, Navigatable {
                 self?.navigator.show(segue: .whatsNew(block: block), sender: self, transition: .modal)
             }
         }).disposed(by: rx.disposeBag)
+    }
+
+    override func tapHandler(_ gesture: UIGestureRecognizer) {
+        tabTapped.onNext(gesture)
+    }
+
+    func tabTapped(_ gesture: UIGestureRecognizer) {
+        super.tapHandler(gesture)
     }
 }

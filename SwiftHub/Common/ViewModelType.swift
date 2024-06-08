@@ -29,14 +29,13 @@ class ViewModel: NSObject {
     let footerLoading = ActivityIndicator()
 
     let error = ErrorTracker()
-    let serverError = PublishSubject<Error>()
     let parsedError = PublishSubject<ApiError>()
 
     init(provider: SwiftHubAPI) {
         self.provider = provider
         super.init()
 
-        serverError.asObservable().map { (error) -> ApiError? in
+        error.asObservable().map { (error) -> ApiError? in
             do {
                 let errorResponse = error as? MoyaError
                 if let body = try errorResponse?.response?.mapJSON() as? [String: Any],
@@ -49,7 +48,7 @@ class ViewModel: NSObject {
             return nil
         }.filterNil().bind(to: parsedError).disposed(by: rx.disposeBag)
 
-        parsedError.subscribe(onNext: { (error) in
+        error.asDriver().drive(onNext: { (error) in
             logError("\(error)")
         }).disposed(by: rx.disposeBag)
     }

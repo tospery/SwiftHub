@@ -27,11 +27,13 @@ class TextField: UITextField {
     }
 
     func makeUI() {
-        theme.textColor = themeService.attribute { $0.text }
-        theme.tintColor = themeService.attribute { $0.secondary }
-        theme.placeholderColor = themeService.attribute { $0.textGray }
-        theme.borderColor = themeService.attribute { $0.text }
-        theme.keyboardAppearance = themeService.attribute { $0.keyboardAppearance }
+        themeService.rx
+            .bind({ $0.text }, to: rx.textColor)
+            .bind({ $0.secondary }, to: rx.tintColor)
+            .bind({ $0.textGray }, to: rx.placeholderColor)
+            .bind({ $0.text }, to: rx.borderColor)
+            .bind({ $0.keyboardAppearance }, to: rx.keyboardAppearance)
+            .disposed(by: rx.disposeBag)
 
         layer.masksToBounds = true
         borderWidth = Configs.BaseDimensions.borderWidth

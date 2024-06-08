@@ -23,15 +23,12 @@ class SearchBar: UISearchBar {
     func makeUI() {
         placeholder = R.string.localizable.commonSearch.key.localized()
         isTranslucent = false
-        searchBarStyle = .minimal
 
-        theme.tintColor = themeService.attribute { $0.secondary }
-        theme.barTintColor = themeService.attribute { $0.primaryDark }
-
-        if let textField = textField {
-            textField.theme.textColor = themeService.attribute { $0.text }
-            textField.theme.keyboardAppearance = themeService.attribute { $0.keyboardAppearance }
-        }
+        themeService.rx
+            .bind({ $0.secondary }, to: rx.tintColor)
+            .bind({ $0.primaryDark }, to: rx.barTintColor)
+            .bind({ $0.keyboardAppearance }, to: UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self]).rx.keyboardAppearance)
+            .disposed(by: rx.disposeBag)
 
         rx.textDidBeginEditing.asObservable().subscribe(onNext: { [weak self] () in
             self?.setShowsCancelButton(true, animated: true)

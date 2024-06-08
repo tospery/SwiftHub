@@ -22,9 +22,6 @@
 "Common.Success" = "Հաջողություն";
 "Common.Error" = "Սխալ";
 "Common.NoResults" = "Ոչ մի արդյունք";
-/* Toast */
-"Toast.ConnectionBack.Message" = "Կապը վերականգնվեց";
-"Toast.ConnectionLost.Message" = "Կապ չկա";
 /* Home TabBar */
 "Home.TabBar.Events.Title" = "Միջոցառումներ";
 "Home.TabBar.Search.Title" = "Որոնում";
@@ -41,15 +38,10 @@
 /* Login */
 //"Login.Navigation.Title" = "Մուտք";
 "Login.BasicSegment.Title" = "Հիմնական";
-"Login.PersonalSegment.Title" = "Անձնական";
 "Login.OAuthSegment.Title" = "OAuth";
 "Login.LoginTextField.Placeholder" = "մուտքանուն";
 "Login.PasswordTextField.Placeholder" = "գաղտնաբառ";
 "Login.BasicLoginButton.Title" = "Մուտք";
-"Login.PersonalTitleLabel.Text" = "Անհատական Մուտքի Թոքեն";
-"Login.PersonalDetailLabel.Text" = "Այս թույլտվությունները պահանջվում են\n%@";
-"Login.PersonalTokenTextField.Placeholder" = "անհատական մուտքի թոքեն";
-"Login.PersonalLoginButton.Title" = "Մուտք";
 "Login.TitleLabel.Text" = "Բարի գալուստ SwiftHub";
 "Login.DetailLabel.Text" = "Հիմնական Authentication-ի կամ OAuth-ի օգտագործման շնորհիվ կարող եք կատարել ժամում մինչեւ 5000 հարցում: \n\nԱնանուն հարցումների համար սահմանվում է ժամում մինչեւ 60 հարցում:";
 "Login.OAuthloginButton.Title" = "Մուտք Github-ով";
@@ -86,7 +78,6 @@
 "Repository.ReadmeCell.Title" = "Կարդացեք ինձ";
 "Repository.SourceCell.Title" = "Աղբյուրի կոդը";
 "Repository.StarsHistoryCell.Title" = "Աստղերի պատմություն";
-"Repository.CountLinesOfCodeCell.Title" = "Կոդի տողերի քանակը";
 /* Issues */
 "Issues.Navigation.Title" = "Խնդիրներ";
 "Issues.OpenSegment.Title" = "Բաց";
@@ -153,15 +144,12 @@
 "User.RepositoriesButton.Title" = "Ռեպոզիտորիաներ";
 "User.FollowersButton.Title" = "Հետեւորդներ";
 "User.FollowingButton.Title" = "Համախոհներ";
-"User.CreatedCell.Title" = "Ստեղծվել է";
-"User.UpdatedCell.Title" = "Թարմացվել է";
 "User.StarsCell.Title" = "Աստղեր";
 "User.WatchingCell.Title" = "Դիտում է";
 "User.EventsCell.Title" = "Միջոցառումներ";
 "User.CompanyCell.Title" = "Ընկերություն";
 "User.BlogCell.Title" = "Կայք";
 "User.ProfileSummaryCell.Title" = "Պրոֆիլի Ամփոփագիր";
-"User.ContributionsCell.Title" = "Ներդրումներ";
 "User.PinnedSection.Title" = "Կապակցված";
 "User.OrganizationsSection.Title" = "Կազմակերպություններ";
 /* Users */
@@ -173,8 +161,8 @@
 "Users.ContributorsNavigation.Title" = "Ներդրողներ";
 /* Whats New */
 "WhatsNew.Title" = "Ինչ է Նոր";
-"WhatsNew.Item1.Title" = "Կոդի տողերի քանակը";
-"WhatsNew.Item1.Subtitle" = "Կոդերի տողերը հաշվելու գործիք";
+"WhatsNew.Item1.Title" = "WhatsNewKit";
+"WhatsNew.Item1.Subtitle" = "WhatsNewKit- ը Ձեզ հնարավորություն է տալիս հեշտությամբ ցուցադրել ձեր հիանալի հավելվածի նոր առանձնահատկությունները";
 "WhatsNew.Item2.Title" = "Գունային Թեմաներ";
 "WhatsNew.Item2.Subtitle" = "Դուք կարող եք կիրառել տարբեր Գունային թեմաներ բաց եւ մուգ եղանակներով";
 "WhatsNew.Item3.Title" = "Բաց կոդով";

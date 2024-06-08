@@ -53,22 +53,22 @@ extension Label {
     }
 
     var leftTextInset: CGFloat {
-        get { return textInsets.left }
         set { textInsets.left = newValue }
+        get { return textInsets.left }
     }
 
     var rightTextInset: CGFloat {
-        get { return textInsets.right }
         set { textInsets.right = newValue }
+        get { return textInsets.right }
     }
 
     var topTextInset: CGFloat {
-        get { return textInsets.top }
         set { textInsets.top = newValue }
+        get { return textInsets.top }
     }
 
     var bottomTextInset: CGFloat {
-        get { return textInsets.bottom }
         set { textInsets.bottom = newValue }
+        get { return textInsets.bottom }
     }
 }

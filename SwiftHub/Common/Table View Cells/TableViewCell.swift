@@ -27,7 +27,7 @@ class TableViewCell: UITableViewCell {
         view.cornerRadius = Configs.BaseDimensions.cornerRadius
         self.addSubview(view)
         view.snp.makeConstraints({ (make) in
-            make.edges.equalToSuperview().inset(UIEdgeInsets(horizontal: self.inset, vertical: self.inset/2))
+            make.edges.equalToSuperview().inset(UIEdgeInsets(horizontal: self.inset*2, vertical: self.inset))
         })
         return view
     }()
@@ -39,7 +39,7 @@ class TableViewCell: UITableViewCell {
         view.alignment = .center
         self.containerView.addSubview(view)
         view.snp.makeConstraints({ (make) in
-            make.edges.equalToSuperview().inset(inset/2)
+            make.edges.equalToSuperview().inset(inset)
         })
         return view
     }()
@@ -60,8 +60,10 @@ class TableViewCell: UITableViewCell {
         selectionStyle = .none
         backgroundColor = .clear
 
-        theme.selectionColor = themeService.attribute { $0.primary }
-        containerView.theme.backgroundColor = themeService.attribute { $0.primary }
+        themeService.rx
+            .bind({ $0.primary }, to: rx.selectionColor)
+            .bind({ $0.primary }, to: containerView.rx.backgroundColor)
+            .disposed(by: rx.disposeBag)
 
         updateUI()
     }
@@ -69,8 +71,13 @@ class TableViewCell: UITableViewCell {
     func updateUI() {
         setNeedsDisplay()
     }
+}
 
-    func bind(to viewModel: TableViewCellViewModel) {
+extension Reactive where Base: TableViewCell {
 
+    var selectionColor: Binder<UIColor?> {
+        return Binder(self.base) { view, attr in
+            view.selectionColor = attr
+        }
     }
 }

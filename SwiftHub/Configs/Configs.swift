@@ -33,7 +33,6 @@ struct Configs {
 
     struct App {
         static let githubUrl = "https://github.com/khoren93/SwiftHub"
-        static let githubScope = "user+repo+notifications+read:org"
         static let bundleIdentifier = "com.public.SwiftHub"
     }
 
@@ -41,16 +40,14 @@ struct Configs {
         static let useStaging = false  // set true for tests and generating screenshots with fastlane
         static let loggingEnabled = false
         static let githubBaseUrl = "https://api.github.com"
-        static let trendingGithubBaseUrl = "https://gtrend.yapie.me"
-        static let codetabsBaseUrl = "https://api.codetabs.com/v1"
+        static let trendingGithubBaseUrl = "https://github-trending-api.now.sh"
         static let githistoryBaseUrl = "https://github.githistory.xyz"
         static let starHistoryBaseUrl = "https://star-history.t9t.io"
         static let profileSummaryBaseUrl = "https://profile-summary-for-github.com"
-        static let githubSkylineBaseUrl = "https://skyline.github.com"
     }
 
     struct BaseDimensions {
-        static let inset: CGFloat = 8
+        static let inset: CGFloat = 10
         static let tabBarHeight: CGFloat = 58
         static let toolBarHeight: CGFloat = 66
         static let navBarWithStatusBarHeight: CGFloat = 64
@@ -58,8 +55,8 @@ struct Configs {
         static let borderWidth: CGFloat = 1
         static let buttonHeight: CGFloat = 40
         static let textFieldHeight: CGFloat = 40
-        static let tableRowHeight: CGFloat = 36
-        static let segmentedControlHeight: CGFloat = 40
+        static let tableRowHeight: CGFloat = 40
+        static let segmentedControlHeight: CGFloat = 36
     }
 
     struct Path {

@@ -2,7 +2,6 @@ disabled_rules: # rule identifiers to exclude from running
   - missing_docs
   - unused_closure_parameter
   - cyclomatic_complexity
-  - inclusive_language
 
 opt_in_rules: # some rules are only opt-in
   - empty_count
@@ -30,8 +29,8 @@ force_try:
 line_length: 300
 
 function_body_length:
-  - 400 # warning
-  - 500 # error
+  - 300 # warning
+  - 400 # error
 
 function_parameter_count:
   - 10 # warning
@@ -43,17 +42,17 @@ large_tuple:
 
 # they can set both implicitly with an array
 type_body_length:
-  - 400 # warning
-  - 500 # error
+  - 300 # warning
+  - 400 # error
 
 # or they can set both explicitly
 file_length:
   warning: 1000
   error: 2000
 
-#cyclomatic_complexity:
-#  - 15 # warning
-#  - 30 # error
+cyclomatic_complexity:
+  - 15 # warning
+  - 30 # error
 
 # naming rules can set warnings/errors for min_length and max_length
 # additionally they can set excluded names

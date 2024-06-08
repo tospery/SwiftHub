@@ -43,7 +43,6 @@ class Navigator {
         case notifications(viewModel: NotificationsViewModel)
         case issues(viewModel: IssuesViewModel)
         case issueDetails(viewModel: IssueViewModel)
-        case linesCount(viewModel: LinesCountViewModel)
         case theme(viewModel: ThemeViewModel)
         case language(viewModel: LanguageViewModel)
         case acknowledgements
@@ -92,7 +91,6 @@ class Navigator {
         case .notifications(let viewModel): return NotificationsViewController(viewModel: viewModel, navigator: self)
         case .issues(let viewModel): return IssuesViewController(viewModel: viewModel, navigator: self)
         case .issueDetails(let viewModel): return IssueViewController(viewModel: viewModel, navigator: self)
-        case .linesCount(let viewModel): return LinesCountViewController(viewModel: viewModel, navigator: self)
         case .theme(let viewModel): return ThemeViewController(viewModel: viewModel, navigator: self)
         case .language(let viewModel): return LanguageViewController(viewModel: viewModel, navigator: self)
         case .acknowledgements: return AcknowListViewController()
@@ -155,7 +153,7 @@ class Navigator {
         }
 
         if let nav = sender as? UINavigationController {
-            // push root controller on navigation stack
+            //push root controller on navigation stack
             nav.pushViewController(target, animated: false)
             return
         }

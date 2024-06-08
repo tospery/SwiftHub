@@ -71,7 +71,9 @@ class EventsViewController: TableViewController {
                                                     EventSegments.performed.title]
         }).disposed(by: rx.disposeBag)
 
-        headerView.theme.backgroundColor = themeService.attribute { $0.primaryDark }
+        themeService.rx
+            .bind({ $0.primaryDark }, to: headerView.rx.backgroundColor)
+            .disposed(by: rx.disposeBag)
 
         stackView.insertArrangedSubview(headerView, at: 0)
 
@@ -89,6 +91,10 @@ class EventsViewController: TableViewController {
                                          segmentSelection: segmentSelected,
                                          selection: tableView.rx.modelSelected(EventCellViewModel.self).asDriver())
         let output = viewModel.transform(input: input)
+
+        viewModel.loading.asObservable().bind(to: isLoading).disposed(by: rx.disposeBag)
+        viewModel.headerLoading.asObservable().bind(to: isHeaderLoading).disposed(by: rx.disposeBag)
+        viewModel.footerLoading.asObservable().bind(to: isFooterLoading).disposed(by: rx.disposeBag)
 
         output.navigationTitle.drive(onNext: { [weak self] (title) in
             self?.navigationTitle = title
@@ -116,6 +122,10 @@ class EventsViewController: TableViewController {
 
         output.repositorySelected.drive(onNext: { [weak self] (viewModel) in
             self?.navigator.show(segue: .repositoryDetails(viewModel: viewModel), sender: self, transition: .detail)
+        }).disposed(by: rx.disposeBag)
+
+        viewModel.error.asDriver().drive(onNext: { [weak self] (error) in
+            self?.showAlert(title: R.string.localizable.commonError.key.localized(), message: error.localizedDescription)
         }).disposed(by: rx.disposeBag)
     }
 }

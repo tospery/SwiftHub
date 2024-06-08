@@ -33,10 +33,6 @@ class EventCellViewModel: DefaultTableViewCellViewModel {
             let payload = event.payload as? CreatePayload
             actionText = ["created", (payload?.refType.rawValue ?? ""), (payload?.ref ?? ""), "in"].joined(separator: " ")
             badgeImage = payload?.refType.image()
-        case .delete:
-            let payload = event.payload as? DeletePayload
-            actionText = ["deleted", (payload?.refType.rawValue ?? ""), (payload?.ref ?? ""), "in"].joined(separator: " ")
-            badgeImage = payload?.refType.image()
         case .issueComment:
             let payload = event.payload as? IssueCommentPayload
             actionText = ["commented on issue", "#\(payload?.issue?.number ?? 0)", "at"].joined(separator: " ")
@@ -79,7 +75,7 @@ class EventCellViewModel: DefaultTableViewCellViewModel {
         let repoName = event.repository?.fullname ?? ""
 
         title.accept([actorName, actionText, repoName].joined(separator: " "))
-        detail.accept(event.createdAt?.toRelative(since: nil))
+        detail.accept(event.createdAt?.toRelative())
         secondDetail.accept(body)
         imageUrl.accept(event.actor?.avatarUrl)
         badge.accept(badgeImage?.template)
@@ -94,16 +90,6 @@ extension EventCellViewModel {
 }
 
 extension CreateEventType {
-    func image() -> UIImage? {
-        switch self {
-        case .repository: return R.image.icon_cell_badge_repository()
-        case .branch: return R.image.icon_cell_badge_branch()
-        case .tag: return R.image.icon_cell_badge_tag()
-        }
-    }
-}
-
-extension DeleteEventType {
     func image() -> UIImage? {
         switch self {
         case .repository: return R.image.icon_cell_badge_repository()

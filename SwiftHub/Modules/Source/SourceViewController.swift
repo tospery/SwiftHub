@@ -78,6 +78,8 @@ class SourceViewController: ViewController {
                                           languageSelected: languagesPicker.rx.modelSelected(String.self).map { $0.first }.filterNil())
         let output = viewModel.transform(input: input)
 
+        viewModel.loading.asObservable().bind(to: isLoading).disposed(by: rx.disposeBag)
+
         isLoading.subscribe(onNext: { [weak self] (loading) in
             loading ? self?.startAnimating(): self?.stopAnimating()
         }).disposed(by: rx.disposeBag)
@@ -90,7 +92,9 @@ class SourceViewController: ViewController {
             let view = Label()
             view.text = item
             view.textAlignment = .center
-            view.theme.textColor = themeService.attribute { $0.text }
+            themeService.rx
+                .bind({ $0.text }, to: view.rx.textColor)
+                .disposed(by: self.rx.disposeBag)
             return view
         }.disposed(by: rx.disposeBag)
 
@@ -98,9 +102,11 @@ class SourceViewController: ViewController {
             let view = Label()
             view.text = item
             view.textAlignment = .center
-            view.theme.textColor = themeService.attribute { $0.text }
+            themeService.rx
+                .bind({ $0.text }, to: view.rx.textColor)
+                .disposed(by: self.rx.disposeBag)
             return view
-        }.disposed(by: rx.disposeBag)
+            }.disposed(by: rx.disposeBag)
 
         output.highlightedCode.subscribe(onNext: { [weak self] (text) in
             self?.textView.attributedText = text

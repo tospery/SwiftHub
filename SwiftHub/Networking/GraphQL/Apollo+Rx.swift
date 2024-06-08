@@ -23,18 +23,18 @@ extension Reactive where Base: ApolloClient {
                                     cachePolicy: CachePolicy = .returnCacheDataElseFetch,
                                     queue: DispatchQueue = DispatchQueue.main) -> Single<Query.Data> {
         return Single.create { [weak base] single in
-            let cancellableToken = base?.fetch(query: query, cachePolicy: cachePolicy, contextIdentifier: nil, queue: queue, resultHandler: { (result) in
+            let cancellableToken = base?.fetch(query: query, cachePolicy: cachePolicy, context: nil, queue: queue, resultHandler: { (result) in
                 switch result {
                 case .success(let graphQLResult):
                     if let data = graphQLResult.data {
                         single(.success(data))
                     } else if let errors = graphQLResult.errors {
                         // GraphQL errors
-                        single(.failure(RxApolloError.graphQLErrors(errors)))
+                        single(.error(RxApolloError.graphQLErrors(errors)))
                     }
                 case .failure(let error):
                     // Network or response format errors
-                    single(.failure(error))
+                    single(.error(error))
                 }
             })
             return Disposables.create {
@@ -44,20 +44,21 @@ extension Reactive where Base: ApolloClient {
     }
 
     func watch<Query: GraphQLQuery>(query: Query,
-                                    cachePolicy: CachePolicy = .returnCacheDataElseFetch) -> Single<Query.Data> {
+                                    cachePolicy: CachePolicy = .returnCacheDataElseFetch,
+                                    queue: DispatchQueue = DispatchQueue.main) -> Single<Query.Data> {
         return Single.create { [weak base] single in
-            let cancellableToken = base?.watch(query: query, cachePolicy: cachePolicy, resultHandler: { (result) in
+            let cancellableToken = base?.watch(query: query, cachePolicy: cachePolicy, queue: queue, resultHandler: { (result) in
                 switch result {
                 case .success(let graphQLResult):
                     if let data = graphQLResult.data {
                         single(.success(data))
                     } else if let errors = graphQLResult.errors {
                         // GraphQL errors
-                        single(.failure(RxApolloError.graphQLErrors(errors)))
+                        single(.error(RxApolloError.graphQLErrors(errors)))
                     }
                 case .failure(let error):
                     // Network or response format errors
-                    single(.failure(error))
+                    single(.error(error))
                 }
             })
             return Disposables.create {
@@ -76,11 +77,11 @@ extension Reactive where Base: ApolloClient {
                         single(.success(data))
                     } else if let errors = graphQLResult.errors {
                         // GraphQL errors
-                        single(.failure(RxApolloError.graphQLErrors(errors)))
+                        single(.error(RxApolloError.graphQLErrors(errors)))
                     }
                 case .failure(let error):
                     // Network or response format errors
-                    single(.failure(error))
+                    single(.error(error))
                 }
             })
             return Disposables.create {

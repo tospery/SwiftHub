@@ -22,30 +22,27 @@ class HomeTabBarViewModel: ViewModel, ViewModelType {
         let openWhatsNew: Driver<WhatsNewBlock>
     }
 
-    let authorized: Bool
     let whatsNewManager: WhatsNewManager
 
-    init(authorized: Bool, provider: SwiftHubAPI) {
-        self.authorized = authorized
+    override init(provider: SwiftHubAPI) {
         whatsNewManager = WhatsNewManager.shared
         super.init(provider: provider)
     }
 
     func transform(input: Input) -> Output {
 
-        let tabBarItems = Observable.just(authorized).map { (authorized) -> [HomeTabBarItem] in
-            if authorized {
+        let tabBarItems = loggedIn.map { (loggedIn) -> [HomeTabBarItem] in
+            if loggedIn {
                 return [.news, .search, .notifications, .settings]
             } else {
                 return [.search, .login, .settings]
             }
         }.asDriver(onErrorJustReturn: [])
 
-        let whatsNew = whatsNewManager.whatsNew()
-        let whatsNewItems = input.whatsNewTrigger.take(1).map { _ in whatsNew }
+        let whatsNewItems = Driver.just(whatsNewManager.whatsNew())
 
         return Output(tabBarItems: tabBarItems,
-                      openWhatsNew: whatsNewItems.asDriverOnErrorJustComplete())
+                      openWhatsNew: whatsNewItems)
     }
 
     func viewModel(for tabBarItem: HomeTabBarItem) -> ViewModel {

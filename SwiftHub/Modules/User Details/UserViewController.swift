@@ -15,7 +15,6 @@ import BonMot
 private let reuseIdentifier = R.reuseIdentifier.userDetailCell.identifier
 private let repositoryReuseIdentifier = R.reuseIdentifier.repositoryCell.identifier
 private let organizationReuseIdentifier = R.reuseIdentifier.userCell.identifier
-private let contributionsReuseIdentifier = R.reuseIdentifier.contributionsCell.identifier
 
 class UserViewController: TableViewController {
 
@@ -128,10 +127,11 @@ class UserViewController: TableViewController {
     override func makeUI() {
         super.makeUI()
 
-        headerView.theme.backgroundColor = themeService.attribute { $0.primaryDark }
-        usernameLabel.theme.textColor = themeService.attribute { $0.text }
-        detailLabel.theme.textColor = themeService.attribute { $0.text }
-        fullnameLabel.theme.textColor = themeService.attribute { $0.textGray }
+        themeService.rx
+            .bind({ $0.primaryDark }, to: headerView.rx.backgroundColor)
+            .bind({ $0.text }, to: [usernameLabel.rx.textColor, detailLabel.rx.textColor])
+            .bind({ $0.textGray }, to: fullnameLabel.rx.textColor)
+            .disposed(by: rx.disposeBag)
 
         navigationItem.titleView = navigationHeaderView
         navigationItem.rightBarButtonItem = rightBarButton
@@ -143,7 +143,6 @@ class UserViewController: TableViewController {
         tableView.register(R.nib.userDetailCell)
         tableView.register(R.nib.repositoryCell)
         tableView.register(R.nib.userCell)
-        tableView.register(R.nib.contributionsCell)
     }
 
     override func bindViewModel() {
@@ -161,12 +160,11 @@ class UserViewController: TableViewController {
                                         followSelection: followButton.rx.tap.asObservable())
         let output = viewModel.transform(input: input)
 
+        viewModel.loading.asObservable().bind(to: isLoading).disposed(by: rx.disposeBag)
+        viewModel.headerLoading.asObservable().bind(to: isHeaderLoading).disposed(by: rx.disposeBag)
+
         let dataSource = RxTableViewSectionedReloadDataSource<UserSection>(configureCell: { dataSource, tableView, indexPath, item in
             switch item {
-            case .contributionsItem(let viewModel):
-                let cell = (tableView.dequeueReusableCell(withIdentifier: contributionsReuseIdentifier, for: indexPath) as? ContributionsCell)!
-                cell.bind(to: viewModel)
-                return cell
             case .createdItem(let viewModel),
                  .updatedItem(let viewModel),
                  .starsItem(let viewModel),
@@ -196,19 +194,8 @@ class UserViewController: TableViewController {
             .bind(to: tableView.rx.items(dataSource: dataSource))
             .disposed(by: rx.disposeBag)
 
-        Observable.of(output.items.mapToVoid(), orientationEvent.asObservable()).merge()
-            .asDriver(onErrorJustReturn: ()).delay(.milliseconds(100)).drive(onNext: { [weak self] (_) in
-                self?.tableView.beginUpdates()
-                self?.tableView.endUpdates()
-            }).disposed(by: rx.disposeBag)
-
         output.selectedEvent.drive(onNext: { [weak self] (item) in
             switch item {
-            case .contributionsItem:
-                if let url = viewModel.skylineUrl() {
-                    self?.deselectSelectedRow()
-                    self?.navigator.show(segue: .safari(url), sender: self)
-                }
             case .starsItem:
                 if let viewModel = viewModel.viewModel(for: item) as? RepositoriesViewModel {
                     self?.navigator.show(segue: .repositories(viewModel: viewModel), sender: self)
@@ -267,22 +254,22 @@ class UserViewController: TableViewController {
 
         output.repositoriesCount.drive(onNext: { [weak self] (count) in
             let text = R.string.localizable.userRepositoriesButtonTitle.key.localized()
-            self?.repositoriesButton.setAttributedTitle(self?.attributedText(title: text, value: count), for: .normal)
+            self?.repositoriesButton.setAttributedTitle(self?.attributetText(title: text, value: count), for: .normal)
         }).disposed(by: rx.disposeBag)
 
         output.followersCount.drive(onNext: { [weak self] (count) in
             let text = R.string.localizable.userFollowersButtonTitle.key.localized()
-            self?.followersButton.setAttributedTitle(self?.attributedText(title: text, value: count), for: .normal)
+            self?.followersButton.setAttributedTitle(self?.attributetText(title: text, value: count), for: .normal)
         }).disposed(by: rx.disposeBag)
 
         output.followingCount.drive(onNext: { [weak self] (count) in
             let text = R.string.localizable.userFollowingButtonTitle.key.localized()
-            self?.followingButton.setAttributedTitle(self?.attributedText(title: text, value: count), for: .normal)
+            self?.followingButton.setAttributedTitle(self?.attributetText(title: text, value: count), for: .normal)
         }).disposed(by: rx.disposeBag)
 
         output.imageSelected.drive(onNext: { [weak self] () in
             if let strongSelf = self {
-                strongSelf.ownerImageView.present(from: strongSelf)
+                strongSelf.ownerImageView.presentFullScreenController(from: strongSelf)
             }
         }).disposed(by: rx.disposeBag)
 
@@ -297,9 +284,13 @@ class UserViewController: TableViewController {
         output.usersSelected.drive(onNext: { [weak self] (viewModel) in
             self?.navigator.show(segue: .users(viewModel: viewModel), sender: self)
         }).disposed(by: rx.disposeBag)
+
+        viewModel.error.asDriver().drive(onNext: { [weak self] (error) in
+            self?.showAlert(title: R.string.localizable.commonError.key.localized(), message: error.localizedDescription)
+        }).disposed(by: rx.disposeBag)
     }
 
-    func attributedText(title: String, value: Int) -> NSAttributedString {
+    func attributetText(title: String, value: Int) -> NSAttributedString {
         let titleText = title.styled(with: .color(.white),
                                      .font(.boldSystemFont(ofSize: 12)),
                                      .alignment(.center))

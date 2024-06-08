@@ -13,9 +13,10 @@ class PullRequestCell: DefaultTableViewCell {
 
     override func makeUI() {
         super.makeUI()
+        leftImageView.cornerRadius = 25
     }
 
-    override func bind(to viewModel: TableViewCellViewModel) {
+    override func bind(to viewModel: DefaultTableViewCellViewModel) {
         super.bind(to: viewModel)
         guard let viewModel = viewModel as? PullRequestCellViewModel else { return }
         cellDisposeBag = DisposeBag()

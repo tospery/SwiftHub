@@ -10,12 +10,12 @@ import UIKit
 import RxSwift
 import RxCocoa
 import DZNEmptyDataSet
+import NVActivityIndicatorView
 import Hero
 import Localize_Swift
 import GoogleMobileAds
-import SVProgressHUD
 
-class ViewController: UIViewController, Navigatable {
+class ViewController: UIViewController, Navigatable, NVActivityIndicatorViewable {
 
     var viewModel: ViewModel?
     var navigator: Navigator!
@@ -52,7 +52,6 @@ class ViewController: UIViewController, Navigatable {
 
     let languageChanged = BehaviorRelay<Void>(value: ())
 
-    let orientationEvent = PublishSubject<Void>()
     let motionShakeEvent = PublishSubject<Void>()
 
     lazy var searchBar: SearchBar = {
@@ -75,7 +74,7 @@ class ViewController: UIViewController, Navigatable {
     }()
 
     lazy var bannerView: GADBannerView = {
-        let view = GADBannerView(adSize: GADCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(view.width))
+        let view = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait)
         view.rootViewController = self
         view.adUnitID = Keys.adMob.apiKey
         view.hero.id = "BannerView"
@@ -116,12 +115,10 @@ class ViewController: UIViewController, Navigatable {
 
         // Observe device orientation change
         NotificationCenter.default
-            .rx.notification(UIDevice.orientationDidChangeNotification).mapToVoid()
-            .bind(to: orientationEvent).disposed(by: rx.disposeBag)
-
-        orientationEvent.subscribe { [weak self] (event) in
-            self?.orientationChanged()
-        }.disposed(by: rx.disposeBag)
+            .rx.notification(UIDevice.orientationDidChangeNotification)
+            .subscribe { [weak self] (event) in
+                self?.orientationChanged()
+            }.disposed(by: rx.disposeBag)
 
         // Observe application did become active notification
         NotificationCenter.default
@@ -195,42 +192,30 @@ class ViewController: UIViewController, Navigatable {
             }
         }).disposed(by: rx.disposeBag)
 
+        languageChanged.subscribe(onNext: { [weak self] () in
+            self?.emptyDataSetTitle = R.string.localizable.commonNoResults.key.localized()
+        }).disposed(by: rx.disposeBag)
+
         motionShakeEvent.subscribe(onNext: { () in
             let theme = themeService.type.toggled()
             themeService.switch(theme)
         }).disposed(by: rx.disposeBag)
 
-        view.theme.backgroundColor = themeService.attribute { $0.primaryDark }
-        backBarButton.theme.tintColor = themeService.attribute { $0.secondary }
-        closeBarButton.theme.tintColor = themeService.attribute { $0.secondary }
-        theme.emptyDataSetImageTintColorBinder = themeService.attribute { $0.text }
+        themeService.rx
+            .bind({ $0.primaryDark }, to: view.rx.backgroundColor)
+            .bind({ $0.secondary }, to: [backBarButton.rx.tintColor, closeBarButton.rx.tintColor])
+            .bind({ $0.text }, to: self.rx.emptyDataSetImageTintColorBinder)
+            .disposed(by: rx.disposeBag)
 
         updateUI()
     }
 
     func bindViewModel() {
-        viewModel?.loading.asObservable().bind(to: isLoading).disposed(by: rx.disposeBag)
-        viewModel?.parsedError.asObservable().bind(to: error).disposed(by: rx.disposeBag)
 
-        languageChanged.subscribe(onNext: { [weak self] () in
-            self?.emptyDataSetTitle = R.string.localizable.commonNoResults.key.localized()
-        }).disposed(by: rx.disposeBag)
-
-        isLoading.subscribe(onNext: { isLoading in
-            UIApplication.shared.isNetworkActivityIndicatorVisible = isLoading
-        }).disposed(by: rx.disposeBag)
     }
 
     func updateUI() {
 
-    }
-
-    func startAnimating() {
-        SVProgressHUD.show()
-    }
-
-    func stopAnimating() {
-        SVProgressHUD.dismiss()
     }
 
     override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
@@ -288,6 +273,16 @@ extension ViewController {
         if swipeRecognizer.state == .recognized {
             LibsManager.shared.showFlex()
             HeroDebugPlugin.isEnabled = !HeroDebugPlugin.isEnabled
+        }
+    }
+}
+
+extension Reactive where Base: ViewController {
+
+    /// Bindable sink for `backgroundColor` property
+    var emptyDataSetImageTintColorBinder: Binder<UIColor?> {
+        return Binder(self.base) { view, attr in
+            view.emptyDataSetImageTintColor.accept(attr)
         }
     }
 }

@@ -12,10 +12,11 @@ class ReleaseCell: DefaultTableViewCell {
 
     override func makeUI() {
         super.makeUI()
+        leftImageView.cornerRadius = 25
         secondDetailLabel.numberOfLines = 0
     }
 
-    override func bind(to viewModel: TableViewCellViewModel) {
+    override func bind(to viewModel: DefaultTableViewCellViewModel) {
         super.bind(to: viewModel)
         guard let viewModel = viewModel as? ReleaseCellViewModel else { return }
 

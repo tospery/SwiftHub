@@ -16,16 +16,12 @@ class GraphApi: SwiftHubAPI {
     let restApi: RestApi
     let token: String
 
-    private(set) lazy var client: ApolloClient = {
-        let client = URLSessionClient()
-        let cache = InMemoryNormalizedCache()
-        let store = ApolloStore(cache: cache)
-        let provider = NetworkInterceptorProvider(client: client, store: store, token: token)
-        let url = URL(string: "https://api.github.com/graphql")!
-        let transport = RequestChainNetworkTransport(interceptorProvider: provider,
-                                                     endpointURL: url)
-        return ApolloClient(networkTransport: transport, store: store)
-    }()
+    private lazy var networkTransport = HTTPNetworkTransport(
+        url: "https://api.github.com/graphql".url!,
+        delegate: self
+    )
+
+    private(set) lazy var client = ApolloClient(networkTransport: self.networkTransport)
 
     init(restApi: RestApi, token: String) {
         self.restApi = restApi
@@ -33,38 +29,15 @@ class GraphApi: SwiftHubAPI {
     }
 }
 
-class NetworkInterceptorProvider: DefaultInterceptorProvider {
-    let token: String
-    init(client: URLSessionClient = URLSessionClient(), store: ApolloStore, token: String) {
-        self.token = token
-        super.init(client: client, shouldInvalidateClientOnDeinit: true, store: store)
+extension GraphApi: HTTPNetworkTransportPreflightDelegate {
+    func networkTransport(_ networkTransport: HTTPNetworkTransport, shouldSend request: URLRequest) -> Bool {
+        return true
     }
 
-    override func interceptors<Operation: GraphQLOperation>(for operation: Operation) -> [ApolloInterceptor] {
-        var interceptors = super.interceptors(for: operation)
-        interceptors.insert(TokenAddingInterceptor(token: token), at: 0)
-        return interceptors
-    }
-}
-
-class TokenAddingInterceptor: ApolloInterceptor {
-    let token: String
-
-    init(token: String) {
-        self.token = token
-    }
-
-    func interceptAsync<Operation: GraphQLOperation>(
-        chain: RequestChain,
-        request: HTTPRequest<Operation>,
-        response: HTTPResponse<Operation>?,
-        completion: @escaping (Result<GraphQLResult<Operation.Data>, Error>) -> Void) {
-
-        request.addHeader(name: "Authorization", value: "Bearer \(token)")
-
-        chain.proceedAsync(request: request,
-                           response: response,
-                           completion: completion)
+    func networkTransport(_ networkTransport: HTTPNetworkTransport, willSend request: inout URLRequest) {
+        var headers = request.allHTTPHeaderFields ?? [String: String]()
+        headers["Authorization"] = "Bearer \(token)"
+        request.allHTTPHeaderFields = headers
     }
 }
 
@@ -279,11 +252,6 @@ extension GraphApi {
 
     func languages() -> Single<[Language]> {
         return restApi.languages()
-    }
-
-    // MARK: - Codetabs
-    func numberOfLines(fullname: String) -> Single<[LanguageLines]> {
-        return restApi.numberOfLines(fullname: fullname)
     }
 }
 

@@ -70,7 +70,9 @@ class ChatViewController: MessagesViewController {
 
         autocompleteManager.defaultTextAttributes = [.font: UIFont.preferredFont(forTextStyle: .callout), .foregroundColor: UIColor.text()]
 
-        autocompleteManager.tableView.theme.backgroundColor = themeService.attribute { $0.primaryDark }
+        themeService.rx
+            .bind({ $0.primaryDark }, to: autocompleteManager.tableView.rx.backgroundColor)
+            .disposed(by: rx.disposeBag)
     }
 
     func configureMessageCollectionView() {
@@ -79,11 +81,12 @@ class ChatViewController: MessagesViewController {
         messagesCollectionView.messagesLayoutDelegate = self
         messagesCollectionView.messagesDisplayDelegate = self
 
-        scrollsToLastItemOnKeyboardBeginsEditing = true
+        scrollsToBottomOnKeyboardBeginsEditing = true
         maintainPositionOnKeyboardFrameChanged = true
 
-        view.theme.backgroundColor = themeService.attribute { $0.primaryDark }
-        messagesCollectionView.theme.backgroundColor = themeService.attribute { $0.primaryDark }
+        themeService.rx
+            .bind({ $0.primaryDark }, to: [view.rx.backgroundColor, messagesCollectionView.rx.backgroundColor])
+            .disposed(by: rx.disposeBag)
     }
 
     func configureMessageInputBar() {
@@ -91,13 +94,14 @@ class ChatViewController: MessagesViewController {
         messageInputBar.inputTextView.keyboardType = .twitter
         messageInputBar.inputTextView.cornerRadius = Configs.BaseDimensions.cornerRadius
 
-        messageInputBar.backgroundView.theme.backgroundColor = themeService.attribute { $0.primary }
-        messageInputBar.inputTextView.theme.backgroundColor = themeService.attribute { $0.primaryDark }
-        messageInputBar.theme.tintColor = themeService.attribute { $0.secondary }
-        messageInputBar.sendButton.theme.titleColor(from: themeService.attribute { $0.secondary }, for: .normal)
-        messageInputBar.sendButton.theme.titleColor(from: themeService.attribute { $0.secondaryDark }, for: .highlighted)
-        messageInputBar.separatorLine.theme.backgroundColor = themeService.attribute { $0.separator }
-        messageInputBar.inputTextView.theme.keyboardAppearance = themeService.attribute { $0.keyboardAppearance }
+        themeService.rx
+            .bind({ $0.primary }, to: messageInputBar.backgroundView.rx.backgroundColor)
+            .bind({ $0.primaryDark }, to: messageInputBar.inputTextView.rx.backgroundColor)
+            .bind({ $0.secondary }, to: [messageInputBar.rx.tintColor, messageInputBar.sendButton.rx.titleColor(for: .normal)])
+            .bind({ $0.secondaryDark }, to: messageInputBar.sendButton.rx.titleColor(for: .highlighted))
+            .bind({ $0.separator }, to: messageInputBar.separatorLine.rx.backgroundColor)
+            .bind({ $0.keyboardAppearance }, to: messageInputBar.inputTextView.rx.keyboardAppearance)
+            .disposed(by: rx.disposeBag)
     }
 
     // MARK: - Helpers
@@ -135,7 +139,7 @@ extension ChatViewController: MessagesDataSource {
     }
 
     func cellBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
-        let dateString = message.sentDate.toRelative(since: nil)
+        let dateString = message.sentDate.toRelative()
         return NSAttributedString(string: dateString, attributes: [
             NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .caption2),
             NSAttributedString.Key.foregroundColor: UIColor.text()
@@ -176,7 +180,7 @@ extension ChatViewController: MessageLabelDelegate {
     }
 }
 
-extension ChatViewController: InputBarAccessoryViewDelegate {
+extension ChatViewController: MessageInputBarDelegate {
 
     func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
         sendPressed.onNext(text)

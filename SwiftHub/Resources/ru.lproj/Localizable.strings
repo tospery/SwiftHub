@@ -22,9 +22,6 @@
 "Common.Success" = "Успешно";
 "Common.Error" = "Ошибка";
 "Common.NoResults" = "Нет результатов";
-/* Toast */
-"Toast.ConnectionBack.Message" = "Соединение восстановлено";
-"Toast.ConnectionLost.Message" = "Нет соединения";
 /* Home TabBar */
 "Home.TabBar.Events.Title" = "События";
 "Home.TabBar.Search.Title" = "Поиск";
@@ -41,15 +38,10 @@
 /* Login */
 //"Login.Navigation.Title" = "Вход";
 "Login.BasicSegment.Title" = "Базовое";
-"Login.PersonalSegment.Title" = "Персональный";
 "Login.OAuthSegment.Title" = "OAuth";
 "Login.LoginTextField.Placeholder" = "логин";
 "Login.PasswordTextField.Placeholder" = "пароль";
 "Login.BasicLoginButton.Title" = "Вход";
-"Login.PersonalTitleLabel.Text" = "Персональный токен доступа";
-"Login.PersonalDetailLabel.Text" = "Эти разрешения необходимы\n%@";
-"Login.PersonalTokenTextField.Placeholder" = "персональный токен доступа";
-"Login.PersonalLoginButton.Title" = "Вход";
 "Login.TitleLabel.Text" = "Добро пожаловать в SwiftHub";
 "Login.DetailLabel.Text" = "Для запросов API, использующих обычную аутентификацию или OAuth, вы можете делать до 5000 запросов в час. \n\nДля неаутентифицированных запросов ограничение скорости допускает до 60 запросов в час.";
 "Login.OAuthloginButton.Title" = "Войти с Github";
@@ -86,7 +78,6 @@
 "Repository.ReadmeCell.Title" = "Прочти меня";
 "Repository.SourceCell.Title" = "Исходный код";
 "Repository.StarsHistoryCell.Title" = "История звезд";
-"Repository.CountLinesOfCodeCell.Title" = "Подсчет строк кода";
 /* Issues */
 "Issues.Navigation.Title" = "Проблемы";
 "Issues.OpenSegment.Title" = "Открыто";
@@ -153,15 +144,12 @@
 "User.RepositoriesButton.Title" = "Репозитории";
 "User.FollowersButton.Title" = "Подписчики";
 "User.FollowingButton.Title" = "Подписки";
-"User.CreatedCell.Title" = "Создана";
-"User.UpdatedCell.Title" = "Обновлено";
 "User.StarsCell.Title" = "Звезды";
 "User.WatchingCell.Title" = "Наблюдает";
 "User.EventsCell.Title" = "События";
 "User.CompanyCell.Title" = "Компания";
 "User.BlogCell.Title" = "Блог";
 "User.ProfileSummaryCell.Title" = "Резюме Профиля";
-"User.ContributionsCell.Title" = "Взносы";
 "User.PinnedSection.Title" = "Закрепленные";
 "User.OrganizationsSection.Title" = "Организации";
 /* Users */
@@ -173,8 +161,8 @@
 "Users.ContributorsNavigation.Title" = "Вкладчики";
 /* Whats New */
 "WhatsNew.Title" = "Что Нового";
-"WhatsNew.Item1.Title" = "Подсчет строк кода";
-"WhatsNew.Item1.Subtitle" = "Инструмент для подсчета строк кода из репозиториев";
+"WhatsNew.Item1.Title" = "WhatsNewKit";
+"WhatsNew.Item1.Subtitle" = "WhatsNewKit позволяет вам легко продемонстрировать свои потрясающие новые функции приложения";
 "WhatsNew.Item2.Title" = "Темы";
 "WhatsNew.Item2.Subtitle" = "Вы можете применять различные темы с светлыми и темными режимами";
 "WhatsNew.Item3.Title" = "Открытый исходный код";

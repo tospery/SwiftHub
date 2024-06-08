@@ -13,9 +13,8 @@ class RepositoryDetailCell: DefaultTableViewCell {
     override func makeUI() {
         super.makeUI()
         leftImageView.contentMode = .center
-        leftImageView.cornerRadius = 0
-        leftImageView.snp.updateConstraints { (make) in
-            make.size.equalTo(30)
+        leftImageView.snp.remakeConstraints { (make) in
+            make.size.equalTo(40)
         }
         detailLabel.isHidden = true
         attributedDetailLabel.isHidden = true

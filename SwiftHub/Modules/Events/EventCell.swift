@@ -15,9 +15,10 @@ class EventCell: DefaultTableViewCell {
         super.makeUI()
         titleLabel.numberOfLines = 2
         secondDetailLabel.numberOfLines = 0
+        leftImageView.cornerRadius = 25
     }
 
-    override func bind(to viewModel: TableViewCellViewModel) {
+    override func bind(to viewModel: DefaultTableViewCellViewModel) {
         super.bind(to: viewModel)
         guard let viewModel = viewModel as? EventCellViewModel else { return }
         cellDisposeBag = DisposeBag()

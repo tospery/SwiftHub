@@ -13,10 +13,10 @@ import SnapKit
 import IQKeyboardManagerSwift
 import CocoaLumberjack
 import Kingfisher
-#if DEBUG
 import FLEX
-#endif
-import FirebaseCrashlytics
+import Fabric
+import Crashlytics
+import NVActivityIndicatorView
 import NSObject_Rx
 import RxViewController
 import RxOptional
@@ -25,11 +25,11 @@ import SwifterSwift
 import SwiftDate
 import Hero
 import KafkaRefresh
+import Umbrella
 import Mixpanel
-import FirebaseCore
+import Firebase
 import DropDown
 import Toast_Swift
-import GoogleMobileAds
 
 typealias DropDownView = DropDown
 
@@ -41,20 +41,20 @@ class LibsManager: NSObject {
 
     let bannersEnabled = BehaviorRelay(value: UserDefaults.standard.bool(forKey: Configs.UserDefaultsKeys.bannersEnabled))
 
-    private override init() {
+    override init() {
         super.init()
 
         if UserDefaults.standard.object(forKey: Configs.UserDefaultsKeys.bannersEnabled) == nil {
             bannersEnabled.accept(true)
         }
 
-        bannersEnabled.skip(1).subscribe(onNext: { (enabled) in
+        bannersEnabled.subscribe(onNext: { (enabled) in
             UserDefaults.standard.set(enabled, forKey: Configs.UserDefaultsKeys.bannersEnabled)
-            analytics.set(.adsEnabled(value: enabled))
+            analytics.updateUser(ads: enabled)
         }).disposed(by: rx.disposeBag)
     }
 
-    func setupLibs() {
+    func setupLibs(with window: UIWindow? = nil) {
         let libsManager = LibsManager.shared
         libsManager.setupCocoaLumberjack()
         libsManager.setupAnalytics()
@@ -63,17 +63,19 @@ class LibsManager: NSObject {
         libsManager.setupKafkaRefresh()
         libsManager.setupFLEX()
         libsManager.setupKeyboardManager()
+        libsManager.setupActivityView()
         libsManager.setupDropDown()
         libsManager.setupToast()
     }
 
     func setupTheme() {
-        UIApplication.shared.theme.statusBarStyle = themeService.attribute { $0.statusBarStyle }
+        themeService.rx
+            .bind({ $0.statusBarStyle }, to: UIApplication.shared.rx.statusBarStyle)
+            .disposed(by: rx.disposeBag)
     }
 
     func setupDropDown() {
-        themeService.typeStream.subscribe(onNext: { (themeType) in
-            let theme = themeType.associatedObject
+        themeService.attrsStream.subscribe(onNext: { (theme) in
             DropDown.appearance().backgroundColor = theme.primary
             DropDown.appearance().selectionBackgroundColor = theme.primaryDark
             DropDown.appearance().textColor = theme.text
@@ -88,7 +90,7 @@ class LibsManager: NSObject {
         var style = ToastStyle()
         style.backgroundColor = UIColor.Material.red
         style.messageColor = UIColor.Material.white
-        style.imageSize = CGSize(width: 20, height: 20)
+        style.imageSize = CGSize(width: 30, height: 30)
         ToastManager.shared.style = style
     }
 
@@ -96,12 +98,19 @@ class LibsManager: NSObject {
         if let defaults = KafkaRefreshDefaults.standard() {
             defaults.headDefaultStyle = .replicatorAllen
             defaults.footDefaultStyle = .replicatorDot
-            defaults.theme.themeColor = themeService.attribute { $0.secondary }
+            themeService.rx
+                .bind({ $0.secondary }, to: defaults.rx.themeColor)
+                .disposed(by: rx.disposeBag)
         }
     }
 
+    func setupActivityView() {
+        NVActivityIndicatorView.DEFAULT_TYPE = .ballRotateChase
+        NVActivityIndicatorView.DEFAULT_COLOR = .secondary()
+    }
+
     func setupKeyboardManager() {
-        IQKeyboardManager.shared.enable = true
+        IQKeyboardManager.shared.enable = false
     }
 
     func setupKingfisher() {
@@ -116,7 +125,9 @@ class LibsManager: NSObject {
     }
 
     func setupCocoaLumberjack() {
-        DDLog.add(DDOSLogger.sharedInstance)
+        DDLog.add(DDTTYLogger.sharedInstance) // TTY = Xcode console
+//        DDLog.add(DDASLLogger.sharedInstance) // ASL = Apple System Logs
+
         let fileLogger: DDFileLogger = DDFileLogger() // File Logger
         fileLogger.rollingFrequency = TimeInterval(60*60*24)  // 24 hours
         fileLogger.logFileManager.maximumNumberOfLogFiles = 7
@@ -124,15 +135,16 @@ class LibsManager: NSObject {
     }
 
     func setupFLEX() {
-        #if DEBUG
-        FLEXManager.shared.isNetworkDebuggingEnabled = true
-        #endif
+        FLEXManager.shared().isNetworkDebuggingEnabled = true
     }
 
     func setupAnalytics() {
         FirebaseApp.configure()
-        Mixpanel.initialize(token: Keys.mixpanel.apiKey, trackAutomaticEvents: true)
-        FirebaseConfiguration.shared.setLoggerLevel(.min)
+        Mixpanel.sharedInstance(withToken: Keys.mixpanel.apiKey)
+        Fabric.with([Crashlytics.self])
+        Fabric.sharedSDK().debug = false
+        analytics.register(provider: MixpanelProvider())
+        analytics.register(provider: FirebaseProvider())
     }
 
     func setupAds() {
@@ -143,10 +155,8 @@ class LibsManager: NSObject {
 extension LibsManager {
 
     func showFlex() {
-        #if DEBUG
-        FLEXManager.shared.showExplorer()
+        FLEXManager.shared().showExplorer()
         analytics.log(.flexOpened)
-        #endif
     }
 
     func removeKingfisherCache() -> Observable<Void> {

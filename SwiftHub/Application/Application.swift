@@ -26,15 +26,14 @@ final class Application: NSObject {
 
     private func updateProvider() {
         let staging = Configs.Network.useStaging
-        let githubProvider = staging ? GithubNetworking.stubbingNetworking(): GithubNetworking.defaultNetworking()
-        let trendingGithubProvider = staging ? TrendingGithubNetworking.stubbingNetworking(): TrendingGithubNetworking.defaultNetworking()
-        let codetabsProvider = staging ? CodetabsNetworking.stubbingNetworking(): CodetabsNetworking.defaultNetworking()
-        let restApi = RestApi(githubProvider: githubProvider, trendingGithubProvider: trendingGithubProvider, codetabsProvider: codetabsProvider)
+        let githubProvider = staging ? GithubNetworking.stubbingGithubNetworking(): GithubNetworking.githubNetworking()
+        let trendingGithubProvider = staging ? TrendingGithubNetworking.stubbingTrendingGithubNetworking(): TrendingGithubNetworking.trendingGithubNetworking()
+        let restApi = RestApi(githubProvider: githubProvider, trendingGithubProvider: trendingGithubProvider)
         provider = restApi
 
         if let token = authManager.token, Configs.Network.useStaging == false {
             switch token.type() {
-            case .oAuth(let token), .personal(let token):
+            case .oAuth(let token):
                 provider = GraphApi(restApi: restApi, token: token)
             default: break
             }
@@ -49,15 +48,14 @@ final class Application: NSObject {
 //        presentTestScreen(in: window)
 //        return
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             if let user = User.currentUser(), let login = user.login {
                 analytics.identify(userId: login)
-                analytics.set(.name(value: user.name ?? ""))
-                analytics.set(.email(value: user.email ?? ""))
+                analytics.updateUser(name: user.name ?? "", email: user.email ?? "")
             }
-            let authorized = self?.authManager.token?.isValid ?? false
-            let viewModel = HomeTabBarViewModel(authorized: authorized, provider: provider)
-            self?.navigator.show(segue: .tabs(viewModel: viewModel), sender: nil, transition: .root(in: window))
+
+            let viewModel = HomeTabBarViewModel(provider: provider)
+            self.navigator.show(segue: .tabs(viewModel: viewModel), sender: nil, transition: .root(in: window))
         }
     }
 

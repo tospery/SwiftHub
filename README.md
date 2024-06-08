@@ -6,14 +6,12 @@
   GitHub iOS client in RxSwift and MVVM-C clean architecture.
 </p>
 
-<p align="center">  
-  <a href="https://github.com/khoren93/FlutterHub">
-    FlutterHub - Flutter version available at an early stage
-  </a>
-</p>
-
 <p align="center">
   KotlinHub - Android version is coming soon!
+</p>
+
+<p align="center">  
+  SwiftUI and Combine coming soon!
 </p>
 
 <p align="center">
@@ -40,9 +38,13 @@
 
 ## Screenshots
 
-<pre>
-<img alt="04_trending_repository_screen" src="https://github.com/khoren93/SwiftHub/blob/master/screenshots/04_trending_repository_screen.png?raw=true" width="250">&nbsp; <img alt="01_search_repository_screen" src="https://github.com/khoren93/SwiftHub/blob/master/screenshots/01_search_repository_screen.png?raw=true" width="250">&nbsp; <img alt="02_repository_details_screen" src="https://github.com/khoren93/SwiftHub/blob/master/screenshots/02_repository_details_screen.png?raw=true" width="250">&nbsp; <img alt="05_search_user_screen" src="https://github.com/khoren93/SwiftHub/blob/master/screenshots/05_search_user_screen.png?raw=true" width="250">&nbsp; <img alt="06_user_details_screen" src="https://github.com/khoren93/SwiftHub/blob/master/screenshots/06_user_details_screen.png?raw=true" width="250">&nbsp; <img alt="03_settings_screen" src="https://github.com/khoren93/SwiftHub/blob/master/screenshots/03_settings_screen.png?raw=true" width="250">&nbsp;
-</pre>
+<img alt="04_trending_repository_screen" src="https://github.com/khoren93/SwiftHub/blob/master/screenshots/04_trending_repository_screen.png?raw=true" width="280">&nbsp;
+<img alt="01_search_repository_screen" src="https://github.com/khoren93/SwiftHub/blob/master/screenshots/01_search_repository_screen.png?raw=true" width="280">&nbsp;
+<img alt="02_repository_details_screen" src="https://github.com/khoren93/SwiftHub/blob/master/screenshots/02_repository_details_screen.png?raw=true" width="280">&nbsp;
+
+<img alt="05_search_user_screen" src="https://github.com/khoren93/SwiftHub/blob/master/screenshots/05_search_user_screen.png?raw=true" width="280">&nbsp;
+<img alt="06_user_details_screen" src="https://github.com/khoren93/SwiftHub/blob/master/screenshots/06_user_details_screen.png?raw=true" width="280">&nbsp;
+<img alt="03_settings_screen" src="https://github.com/khoren93/SwiftHub/blob/master/screenshots/03_settings_screen.png?raw=true" width="280">&nbsp;
 
 ## Mind Mapping ([full version](https://github.com/khoren93/SwiftHub/blob/master/iThoughtsX/SwiftHub_full.pdf))
 <p align="center">
@@ -52,16 +54,14 @@
 </p>
 
 ## App Features
-- [x] Basic, Personal Access Token and OAuth2 authentication
+- [x] Basic and OAuth2 authentication
 - [x] View trending repositories and users ([github-trending-api](https://github.com/huchenme/github-trending-api))
 - [x] Advanced searching and sorting repositories and users, filter by language
 - [x] View repository and user details, events, issues, commits, pull requests, contributors, etc...
 - [x] View issue and pull request messages ([MessageKit](https://github.com/MessageKit/MessageKit))
-- [x] Tool for counting lines of code from github repositories ([codetabs](https://github.com/jolav/codetabs)) ([Charts](https://github.com/danielgindi/Charts))
 - [x] The missing star history graph of github repos ([stars-history](https://github.com/timqian/star-history))
 - [x] Quickly browse the history of a file from any git repository ([git-history](https://github.com/pomber/git-history))
 - [x] Tool for visualizing GitHub profiles ([profile-summary-for-github](https://github.com/tipsy/profile-summary-for-github))
-- [x] View a 3D model of your GitHub contribution grap ([skyline](https://skyline.github.com))
 - [x] Source file viewer and syntax highlighting ([Highlightr](https://github.com/raspu/Highlightr))
 - [x] Color themes in light and dark modes ([RxTheme](https://github.com/RxSwiftCommunity/RxTheme))
 - [x] In-app language switching (en, zh, ru, hy) ([Localize-Swift](https://github.com/marmelroy/Localize-Swift))
@@ -113,16 +113,9 @@ Install [`Bundler`](https://bundler.io) for managing Ruby gem dependencies
 [sudo] gem install bundler
 ```
 
-Install [Brew](https://github.com/Homebrew/brew) package manager for macOS:
-
-For MacOS Catalina, macOS Mojave, and MacOS Big Sur:
+Install [Brew](https://github.com/Homebrew/brew) package manager for macOS
 ```sh
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-```
-
-For macOS High Sierra, Sierra, El Capitan, and earlier:
-```sh
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 ```
 
 Install [`Node`](https://nodejs.org/en/) (required to install [Apollo](https://github.com/apollographql/apollo-ios))
@@ -167,7 +160,6 @@ Thanks to them for the beautiful open source icons.
 * [github-trending-api](https://github.com/huchenme/github-trending-api#projects-using-github-trending-api) - Projects using this library
 * [awesome-rxswift](https://github.com/LeoMobileDeveloper/awesome-rxswift#open-source-apps) - Curated list of RxSwift library and learning material
 * [Medium-Mybridge](https://medium.mybridge.co/swift-open-source-for-the-past-month-v-may-2019-c0f6a0d61e34) - Swift Open Source for the Past Month (v.May 2019)
-* [alternativeto](https://alternativeto.net/software/swifthub/) - Crowdsourced software recommendations
 
 ## References
 * [CleanArchitectureRxSwift](https://github.com/sergdort/CleanArchitectureRxSwift) - Clean architecture with RxSwift

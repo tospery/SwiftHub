@@ -13,7 +13,6 @@ class DefaultTableViewCell: TableViewCell {
     lazy var leftImageView: ImageView = {
         let view = ImageView(frame: CGRect())
         view.contentMode = .scaleAspectFit
-        view.cornerRadius = 25
         view.snp.makeConstraints({ (make) in
             make.size.equalTo(50)
         })
@@ -78,11 +77,12 @@ class DefaultTableViewCell: TableViewCell {
     override func makeUI() {
         super.makeUI()
 
-        titleLabel.theme.textColor = themeService.attribute { $0.text }
-        detailLabel.theme.textColor = themeService.attribute { $0.textGray }
-        secondDetailLabel.theme.textColor = themeService.attribute { $0.text }
-        leftImageView.theme.tintColor = themeService.attribute { $0.secondary }
-        rightImageView.theme.tintColor = themeService.attribute { $0.secondary }
+        themeService.rx
+            .bind({ $0.text }, to: titleLabel.rx.textColor)
+            .bind({ $0.textGray }, to: detailLabel.rx.textColor)
+            .bind({ $0.text }, to: secondDetailLabel.rx.textColor)
+            .bind({ $0.secondary }, to: [leftImageView.rx.tintColor, rightImageView.rx.tintColor])
+            .disposed(by: rx.disposeBag)
 
         stackView.addArrangedSubview(leftImageView)
         stackView.addArrangedSubview(textsStackView)
@@ -94,10 +94,7 @@ class DefaultTableViewCell: TableViewCell {
         })
     }
 
-    override func bind(to viewModel: TableViewCellViewModel) {
-        super.bind(to: viewModel)
-        guard let viewModel = viewModel as? DefaultTableViewCellViewModel else { return }
-
+    func bind(to viewModel: DefaultTableViewCellViewModel) {
         viewModel.title.asDriver().drive(titleLabel.rx.text).disposed(by: rx.disposeBag)
         viewModel.title.asDriver().replaceNilWith("").map { $0.isEmpty }.drive(titleLabel.rx.isHidden).disposed(by: rx.disposeBag)
 

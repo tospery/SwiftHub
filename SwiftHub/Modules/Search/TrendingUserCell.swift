@@ -12,5 +12,9 @@ class TrendingUserCell: DefaultTableViewCell {
 
     override func makeUI() {
         super.makeUI()
+        leftImageView.cornerRadius = 25
+        leftImageView.snp.remakeConstraints { (make) in
+            make.size.equalTo(50)
+        }
     }
 }

@@ -168,18 +168,19 @@ open class Snapshot: NSObject {
             app.typeKey(XCUIKeyboardKeySecondaryFn, modifierFlags: [])
         #else
 
-            guard self.app != nil else {
+            guard let app = self.app else {
                 NSLog("XCUIApplication is not set. Please call setupSnapshot(app) before snapshot().")
                 return
             }
 
-            let screenshot = XCUIScreen.main.screenshot()
+            let window = app.windows.firstMatch
+            let screenshot = window.screenshot()
             guard var simulator = ProcessInfo().environment["SIMULATOR_DEVICE_NAME"], let screenshotsDir = screenshotsDirectory else { return }
-
+            
             do {
                 // The simulator name contains "Clone X of " inside the screenshot file when running parallelized UI Tests on concurrent devices
-                let regex = try NSRegularExpression(pattern: "Clone [0-9]+ of ")
-                let range = NSRange(location: 0, length: simulator.count)
+                let regex = try NSRegularExpression(pattern: "Clone [0-1]+ of ")
+                let range = NSMakeRange(0, simulator.count)
                 simulator = regex.stringByReplacingMatches(in: simulator, range: range, withTemplate: "")
 
                 let path = screenshotsDir.appendingPathComponent("\(simulator)-\(name).png")
@@ -300,4 +301,4 @@ private extension CGFloat {
 
 // Please don't remove the lines below
 // They are used to detect outdated configuration files
-// SnapshotHelperVersion [1.21]
+// SnapshotHelperVersion [1.17]

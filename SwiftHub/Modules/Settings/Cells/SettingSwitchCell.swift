@@ -18,15 +18,16 @@ class SettingSwitchCell: DefaultTableViewCell {
     override func makeUI() {
         super.makeUI()
         leftImageView.contentMode = .center
-        leftImageView.cornerRadius = 0
-        leftImageView.snp.updateConstraints { (make) in
-            make.size.equalTo(30)
+        leftImageView.snp.remakeConstraints { (make) in
+            make.size.equalTo(40)
         }
         stackView.insertArrangedSubview(switchView, at: 2)
-        leftImageView.theme.tintColor = themeService.attribute { $0.secondary }
+        themeService.rx
+            .bind({ $0.secondary }, to: leftImageView.rx.tintColor)
+            .disposed(by: rx.disposeBag)
     }
 
-    override func bind(to viewModel: TableViewCellViewModel) {
+    override func bind(to viewModel: DefaultTableViewCellViewModel) {
         super.bind(to: viewModel)
         guard let viewModel = viewModel as? SettingSwitchCellViewModel else { return }
 

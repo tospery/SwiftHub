@@ -100,7 +100,7 @@ class RepositoryViewController: TableViewController {
     }()
 
     var panelContent: WebViewController!
-    var panel: FloatingPanelController!
+    let panel = FloatingPanelController()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -111,17 +111,17 @@ class RepositoryViewController: TableViewController {
     override func makeUI() {
         super.makeUI()
 
-        headerView.theme.backgroundColor = themeService.attribute { $0.primaryDark }
-        detailLabel.theme.textColor = themeService.attribute { $0.text }
+        themeService.rx
+            .bind({ $0.primaryDark }, to: headerView.rx.backgroundColor)
+            .bind({ $0.text }, to: detailLabel.rx.textColor)
+            .disposed(by: rx.disposeBag)
 
         navigationItem.rightBarButtonItem = rightBarButton
 
-        panel = FloatingPanelController()
-        panel.delegate = self
         panelContent = WebViewController(viewModel: nil, navigator: navigator)
         panel.set(contentViewController: panelContent)
         panel.track(scrollView: panelContent.webView.scrollView)
-        panel.contentMode = .fitToBounds
+        panel.delegate = self
 
         emptyDataSetTitle = ""
         emptyDataSetImage = nil
@@ -129,7 +129,6 @@ class RepositoryViewController: TableViewController {
         tableView.footRefreshControl = nil
         tableView.register(R.nib.repositoryDetailCell)
         tableView.register(R.nib.languagesCell)
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 90, right: 0)
         bannerView.isHidden = true
     }
 
@@ -148,6 +147,9 @@ class RepositoryViewController: TableViewController {
                                               starSelection: starButton.rx.tap.asObservable())
         let output = viewModel.transform(input: input)
 
+        viewModel.loading.asObservable().bind(to: isLoading).disposed(by: rx.disposeBag)
+        viewModel.headerLoading.asObservable().bind(to: isHeaderLoading).disposed(by: rx.disposeBag)
+
         let dataSource = RxTableViewSectionedReloadDataSource<RepositorySection>(configureCell: { dataSource, tableView, indexPath, item in
             switch item {
             case .parentItem(let viewModel),
@@ -165,8 +167,7 @@ class RepositoryViewController: TableViewController {
                  .notificationsItem(let viewModel),
                  .contributorsItem(let viewModel),
                  .sourceItem(let viewModel),
-                 .starHistoryItem(let viewModel),
-                 .countLinesOfCodeItem(let viewModel):
+                 .starHistoryItem(let viewModel):
                 let cell = (tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath) as? RepositoryDetailCell)!
                 cell.bind(to: viewModel)
                 return cell
@@ -237,10 +238,6 @@ class RepositoryViewController: TableViewController {
                 if let url = viewModel.starHistoryUrl() {
                     self?.navigator.show(segue: .webController(url), sender: self)
                 }
-            case .countLinesOfCodeItem:
-                if let viewModel = viewModel.viewModel(for: item) as? LinesCountViewModel {
-                    self?.navigator.show(segue: .linesCount(viewModel: viewModel), sender: self)
-                }
             default:
                 self?.deselectSelectedRow()
             }
@@ -268,17 +265,17 @@ class RepositoryViewController: TableViewController {
 
         output.watchersCount.drive(onNext: { [weak self] (count) in
             let text = R.string.localizable.repositoryWatchersButtonTitle.key.localized()
-            self?.watchersButton.setAttributedTitle(self?.attributedText(title: text, value: count), for: .normal)
+            self?.watchersButton.setAttributedTitle(self?.attributetText(title: text, value: count), for: .normal)
         }).disposed(by: rx.disposeBag)
 
         output.starsCount.drive(onNext: { [weak self] (count) in
             let text = R.string.localizable.repositoryStarsButtonTitle.key.localized()
-            self?.starsButton.setAttributedTitle(self?.attributedText(title: text, value: count), for: .normal)
+            self?.starsButton.setAttributedTitle(self?.attributetText(title: text, value: count), for: .normal)
         }).disposed(by: rx.disposeBag)
 
         output.forksCount.drive(onNext: { [weak self] (count) in
             let text = R.string.localizable.repositoryForksButtonTitle.key.localized()
-            self?.forksButton.setAttributedTitle(self?.attributedText(title: text, value: count), for: .normal)
+            self?.forksButton.setAttributedTitle(self?.attributetText(title: text, value: count), for: .normal)
         }).disposed(by: rx.disposeBag)
 
         output.imageSelected.drive(onNext: { [weak self] (viewModel) in
@@ -301,15 +298,19 @@ class RepositoryViewController: TableViewController {
             guard let self = self else { return }
             if let url = content?.htmlUrl?.url {
                 self.panelContent.load(url: url)
-                self.panel.addPanel(toParent: self, animated: false)
+                self.panel.addPanel(toParent: self, belowView: nil, animated: false)
                 self.panel.move(to: .tip, animated: true)
             } else {
                 self.panel.removePanelFromParent(animated: false)
             }
         }).disposed(by: rx.disposeBag)
+
+        viewModel.error.asDriver().drive(onNext: { [weak self] (error) in
+            self?.showAlert(title: R.string.localizable.commonError.key.localized(), message: error.localizedDescription)
+        }).disposed(by: rx.disposeBag)
     }
 
-    func attributedText(title: String, value: Int) -> NSAttributedString {
+    func attributetText(title: String, value: Int) -> NSAttributedString {
         let titleText = title.styled(with: .color(.white),
                                      .font(.boldSystemFont(ofSize: 12)),
                                      .alignment(.center))
@@ -324,8 +325,9 @@ class RepositoryViewController: TableViewController {
 }
 
 extension RepositoryViewController: FloatingPanelControllerDelegate {
-    func floatingPanelDidEndAttracting(_ fpc: FloatingPanelController) {
-        let inset = fpc.surfaceView.height
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: inset, right: 0)
+    func floatingPanelDidChangePosition(_ vc: FloatingPanelController) {
+        if let inset = vc.layout.insetFor(position: vc.position) {
+            tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: inset, right: 0)
+        }
     }
 }

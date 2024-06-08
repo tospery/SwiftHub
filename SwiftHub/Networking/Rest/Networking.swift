@@ -41,10 +41,7 @@ class OnlineProvider<Target> where Target: Moya.TargetType {
                             case .statusCode(let response):
                                 if response.statusCode == 401 {
                                     // Unauthorized
-                                    if AuthManager.shared.hasValidToken {
-                                        AuthManager.removeToken()
-                                        Application.shared.presentInitialScreen(in: Application.shared.window)
-                                    }
+//                                    AuthManager.removeToken()
                                 }
                             default: break
                             }
@@ -57,24 +54,16 @@ class OnlineProvider<Target> where Target: Moya.TargetType {
 protocol NetworkingType {
     associatedtype T: TargetType, ProductAPIType
     var provider: OnlineProvider<T> { get }
-
-    static func defaultNetworking() -> Self
-    static func stubbingNetworking() -> Self
 }
 
 struct GithubNetworking: NetworkingType {
     typealias T = GithubAPI
-    let provider: OnlineProvider<T>
+    let provider: OnlineProvider<GithubAPI>
+}
 
-    static func defaultNetworking() -> Self {
-        return GithubNetworking(provider: newProvider(plugins))
-    }
-
-    static func stubbingNetworking() -> Self {
-        return GithubNetworking(provider: OnlineProvider(endpointClosure: endpointsClosure(), requestClosure: GithubNetworking.endpointResolver(), stubClosure: MoyaProvider.immediatelyStub, online: .just(true)))
-    }
-
-    func request(_ token: T) -> Observable<Moya.Response> {
+// MARK: - "Public" interfaces
+extension GithubNetworking {
+    func request(_ token: GithubAPI) -> Observable<Moya.Response> {
         let actualRequest = self.provider.request(token)
         return actualRequest
     }
@@ -82,37 +71,35 @@ struct GithubNetworking: NetworkingType {
 
 struct TrendingGithubNetworking: NetworkingType {
     typealias T = TrendingGithubAPI
-    let provider: OnlineProvider<T>
+    let provider: OnlineProvider<TrendingGithubAPI>
+}
 
-    static func defaultNetworking() -> Self {
-        return TrendingGithubNetworking(provider: newProvider(plugins))
-    }
-
-    static func stubbingNetworking() -> Self {
-        return TrendingGithubNetworking(provider: OnlineProvider(endpointClosure: endpointsClosure(), requestClosure: TrendingGithubNetworking.endpointResolver(), stubClosure: MoyaProvider.immediatelyStub, online: .just(true)))
-    }
-
-    func request(_ token: T) -> Observable<Moya.Response> {
+// MARK: - "Public" interfaces
+extension TrendingGithubNetworking {
+    func request(_ token: TrendingGithubAPI) -> Observable<Moya.Response> {
         let actualRequest = self.provider.request(token)
         return actualRequest
     }
 }
 
-struct CodetabsNetworking: NetworkingType {
-    typealias T = CodetabsApi
-    let provider: OnlineProvider<T>
-
-    static func defaultNetworking() -> Self {
-        return CodetabsNetworking(provider: newProvider(plugins))
+// Static methods
+extension NetworkingType {
+    static func githubNetworking() -> GithubNetworking {
+        return GithubNetworking(provider: newProvider(plugins))
     }
 
-    static func stubbingNetworking() -> Self {
-        return CodetabsNetworking(provider: OnlineProvider(endpointClosure: endpointsClosure(), requestClosure: CodetabsNetworking.endpointResolver(), stubClosure: MoyaProvider.immediatelyStub, online: .just(true)))
+    static func stubbingGithubNetworking() -> GithubNetworking {
+        return GithubNetworking(provider: OnlineProvider(endpointClosure: endpointsClosure(), requestClosure: GithubNetworking.endpointResolver(), stubClosure: MoyaProvider.immediatelyStub, online: .just(true)))
+    }
+}
+
+extension NetworkingType {
+    static func trendingGithubNetworking() -> TrendingGithubNetworking {
+        return TrendingGithubNetworking(provider: newProvider(plugins))
     }
 
-    func request(_ token: T) -> Observable<Moya.Response> {
-        let actualRequest = self.provider.request(token)
-        return actualRequest
+    static func stubbingTrendingGithubNetworking() -> TrendingGithubNetworking {
+        return TrendingGithubNetworking(provider: OnlineProvider(endpointClosure: endpointsClosure(), requestClosure: TrendingGithubNetworking.endpointResolver(), stubClosure: MoyaProvider.immediatelyStub, online: .just(true)))
     }
 }
 

@@ -14,7 +14,6 @@ enum UserSection {
 }
 
 enum UserSectionItem {
-    case contributionsItem(viewModel: ContributionsCellViewModel)
     case createdItem(viewModel: UserDetailCellViewModel)
     case updatedItem(viewModel: UserDetailCellViewModel)
     case starsItem(viewModel: UserDetailCellViewModel)
